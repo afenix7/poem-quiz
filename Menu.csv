@@ -1,0 +1,4 @@
+name,costCoin,url,costExp,category,no
+杏花村,20,../game/game?category=侠&story=1&firstid=kg04IIIJ,0,剧情模式,0
+剧情模式,0,../index/index?category=剧情模式,0,首页,1
+古诗词题,0,../game/game?category=古诗词&story=0,0,首页,0

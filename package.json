@@ -1,0 +1,23 @@
+{
+  "name": "poem-quiz",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aphx1988/poem-quiz.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/aphx1988/poem-quiz/issues"
+  },
+  "homepage": "https://github.com/aphx1988/poem-quiz#readme",
+  "dependencies": {
+    "hydrogen-js-sdk": "^1.7.0"
+  }
+}
