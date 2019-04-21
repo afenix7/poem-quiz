@@ -10,8 +10,16 @@
 				<text style="margin-left:20upx;" class="info" v-if="it.costExp>0&&(!it.costCoin||it.costCoin==0)">-{{it.costExp}}阅历</text>
 			</button>
 			<!-- #endif -->
-			<!-- #ifndef MP-WEIXIN -->
+			<!-- #ifdef H5 -->
 			<button v-for="it in menus" :key="it.no" @click="goto(it.url,it.costCoin,it.costExp)" class="base-button clear-button" >
+				{{it.name}}
+				<text style="margin-left:20upx;" class="info" v-if="it.costCoin>0&&it.costExp>0">-{{it.costCoin}}小红花, -{{it.costExp}}阅历</text>
+				<text style="margin-left:20upx;" class="info" v-if="it.costCoin>0&&(!it.costExp||it.costExp==0)">-{{it.costCoin}}小红花</text>
+				<text style="margin-left:20upx;" class="info" v-if="it.costExp>0&&(!it.costCoin||it.costCoin==0)">-{{it.costExp}}阅历</text>
+			</button>
+			<!-- #endif -->
+			<!-- #ifdef APP-PLUS -->
+			<button v-for="it in menus" :key="it.no" @click="appGetUserInfoAndGoto(it.url,it.costCoin,it.costExp)" class="base-button clear-button" >
 				{{it.name}}
 				<text style="margin-left:20upx;" class="info" v-if="it.costCoin>0&&it.costExp>0">-{{it.costCoin}}小红花, -{{it.costExp}}阅历</text>
 				<text style="margin-left:20upx;" class="info" v-if="it.costCoin>0&&(!it.costExp||it.costExp==0)">-{{it.costCoin}}小红花</text>
@@ -148,6 +156,83 @@
 					
 				});
 			},
+			appGetUserInfoAndGoto(url,cost,costExp){
+				console.log('appGetUserInfoAndGoto');
+				uni.getProvider({
+					service: 'oauth',
+					success:(res) =>{
+							console.log(res.provider)
+							if (~res.provider.indexOf('qq')) {
+									uni.login({
+										provider:'qq',
+										success: function (loginRes) {
+											console.log(JSON.stringify(loginRes));
+											uni.getUserInfo({
+												success: function (infoRes) {
+													console.log(JSON.stringify(infoRes.userInfo));
+													let userinfo;
+													userinfo = {
+														nickName:infoRes.userInfo.nickName,
+														userPic:infoRes.userInfo.avatarUrl,
+														openid:infoRes.userInfo.openId,
+														authData:{
+															qq:{
+																unionId:infoRes.unionId,
+																openId:infoRes.userInfo.openId,
+															}
+														}
+													}
+														Bmob.User.upInfo(userinfo).then(res=>{
+														console.log('upInfo');
+														console.log(res);
+														if(!Bmob.User.current().coin||!Bmob.User.current().exp){
+															let query = Bmob.Query('_User');
+															query.set('id',Bmob.User.current().objectId);
+															if(!Bmob.User.current().coin) query.set('coin',0);
+															if(!Bmob.User.current().exp) query.set('exp',0);
+															query.save().then(res2=>{
+																console.log('init set to zero');
+																console.log(Bmob.User.current());
+																this.goto(url,cost,costExp);
+															});
+														}
+														else{
+															this.goto(url,cost,costExp);
+														}
+												},
+												fail:function(err){
+													console.log(JSON.stringify(err));
+												}
+											});
+										},
+										fail:function(err){
+											console.log(JSON.stringify(err));
+										}
+									});
+							}
+							else if(~res.provider.indexOf('weixin')){
+								
+							}
+							else if(~res.provider.indexOf('sinaweibo')){
+								
+							}
+							else if(~res.provider.indexOf('xiaomi')){
+								
+							}
+					}
+			});
+				
+			},
+			appGoto(url,cost,costExp){
+				if(!Bmob.User.current()){
+					uni.navigateTo({
+						url:'',
+					});
+				}
+				else{
+					this.goto(url,cost,costExp);
+				}
+			},
 			goto(url,cost,costExp){
 				console.log('cost='+cost+',costExp='+costExp);
 				if(cost==0&&costExp==0){
@@ -170,6 +255,7 @@
 								//Bmob.User.current().coin = rCoin;
 								this.setCoinVal(rCoin);
 							}
+							/*
 							if(Bmob.User.current().exp>0&&(Bmob.User.current().exp>=costExp)){
 								needSave = true;
 								let exp = Bmob.User.current().exp?Bmob.User.current().exp:0;
@@ -178,6 +264,7 @@
 								//Bmob.User.current().exp = rExp;
 								this.setExpVal(rExp);
 							}
+							*/
 							if(needSave){
 								query.save().then(res=>{
 									Bmob.User.updateStorage(Bmob.User.current().objectId).then(r=>{

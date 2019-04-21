@@ -11,7 +11,10 @@ const store = new Vuex.Store({
 		// #ifdef MP-WEIXIN
 		pxUnit:'rpx',
 		// #endif
-		// #ifndef MP-WEIXIN
+		// #ifdef H5
+		pxUnit:'px',
+		// #endif
+		// #ifdef APP-PLUS
 		pxUnit:'px',
 		// #endif
 		//Bmob.User.current的值变化不实时，只好如此
@@ -31,6 +34,9 @@ const store = new Vuex.Store({
 		},
 		setRankTitles(state,titles){
 			state.rankTitles = titles;
+		},
+		setPxUnit(state,pxUnit){
+			state.pxUnit = pxUnit;
 		}
 		/*
 		setUserData(state,userData){
@@ -43,6 +49,11 @@ const store = new Vuex.Store({
 			return new Promise((resolve, reject) => {
 				uni.getSystemInfo({
 					success: function(sys) {
+						/*
+						if(sys.platform=='android'){
+							commit('setPxUnit','dp');
+						}
+						*/
 						commit('setWindowHeight',sys.windowHeight);
 						resolve();
 					},

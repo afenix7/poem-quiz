@@ -16,7 +16,19 @@
         ,{
             "path" : "pages/rank/rank",
             "style" : {}
+        },
+		// #ifdef APP-PLUS
+        {
+            "path" : "pages/login/login",
+            "style" : {}
+        },
+		// #endif
+        // #ifdef APP-PLUS
+		{
+            "path" : "pages/regis/regis",
+            "style" : {}
         }
+		// #endif
     ],
 	"globalStyle": {
 		"navigationBarTextStyle": "black",
