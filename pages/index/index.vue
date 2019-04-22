@@ -7,7 +7,7 @@
 				{{it.name}}
 				<text style="margin-left:20upx;" class="info" v-if="it.costCoin>0&&it.costExp>0">-{{it.costCoin}}小红花, -{{it.costExp}}阅历</text>
 				<text style="margin-left:20upx;" class="info" v-if="it.costCoin>0&&(!it.costExp||it.costExp==0)">-{{it.costCoin}}小红花</text>
-				<text style="margin-left:20upx;" class="info" v-if="it.costExp>0&&(!it.costCoin||it.costCoin==0)">-{{it.costExp}}阅历</text>
+				<text style="margin-left:20upx;" class="info" v-if="it.costExp>0&&(!it.costCoin||it.costCoin==0)">{{it.costExp}}阅历</text>
 			</button>
 			<!-- #endif -->
 			<!-- #ifdef H5 -->
@@ -15,7 +15,7 @@
 				{{it.name}}
 				<text style="margin-left:20upx;" class="info" v-if="it.costCoin>0&&it.costExp>0">-{{it.costCoin}}小红花, -{{it.costExp}}阅历</text>
 				<text style="margin-left:20upx;" class="info" v-if="it.costCoin>0&&(!it.costExp||it.costExp==0)">-{{it.costCoin}}小红花</text>
-				<text style="margin-left:20upx;" class="info" v-if="it.costExp>0&&(!it.costCoin||it.costCoin==0)">-{{it.costExp}}阅历</text>
+				<text style="margin-left:20upx;" class="info" v-if="it.costExp>0&&(!it.costCoin||it.costCoin==0)">{{it.costExp}}阅历</text>
 			</button>
 			<!-- #endif -->
 			<!-- #ifdef APP-PLUS -->
@@ -23,7 +23,7 @@
 				{{it.name}}
 				<text style="margin-left:20upx;" class="info" v-if="it.costCoin>0&&it.costExp>0">-{{it.costCoin}}小红花, -{{it.costExp}}阅历</text>
 				<text style="margin-left:20upx;" class="info" v-if="it.costCoin>0&&(!it.costExp||it.costExp==0)">-{{it.costCoin}}小红花</text>
-				<text style="margin-left:20upx;" class="info" v-if="it.costExp>0&&(!it.costCoin||it.costCoin==0)">-{{it.costExp}}阅历</text>
+				<text style="margin-left:20upx;" class="info" v-if="it.costExp>0&&(!it.costCoin||it.costCoin==0)">{{it.costExp}}阅历</text>
 			</button>
 			<!-- #endif -->
 		</view>
@@ -156,6 +156,8 @@
 					
 				});
 			},
+			// #ifdef APP-PLUS
+			
 			appGetUserInfoAndGoto(url,cost,costExp){
 				console.log('appGetUserInfoAndGoto');
 				uni.getProvider({
@@ -183,22 +185,23 @@
 														}
 													}
 														Bmob.User.upInfo(userinfo).then(res=>{
-														console.log('upInfo');
-														console.log(res);
-														if(!Bmob.User.current().coin||!Bmob.User.current().exp){
-															let query = Bmob.Query('_User');
-															query.set('id',Bmob.User.current().objectId);
-															if(!Bmob.User.current().coin) query.set('coin',0);
-															if(!Bmob.User.current().exp) query.set('exp',0);
-															query.save().then(res2=>{
-																console.log('init set to zero');
-																console.log(Bmob.User.current());
+															console.log('upInfo');
+															console.log(res);
+															if(!Bmob.User.current().coin||!Bmob.User.current().exp){
+																let query = Bmob.Query('_User');
+																query.set('id',Bmob.User.current().objectId);
+																if(!Bmob.User.current().coin) query.set('coin',0);
+																if(!Bmob.User.current().exp) query.set('exp',0);
+																query.save().then(res2=>{
+																	console.log('init set to zero');
+																	console.log(Bmob.User.current());
+																	this.goto(url,cost,costExp);
+																});
+															}
+															else{
 																this.goto(url,cost,costExp);
-															});
-														}
-														else{
-															this.goto(url,cost,costExp);
-														}
+															}
+														});
 												},
 												fail:function(err){
 													console.log(JSON.stringify(err));
@@ -233,6 +236,7 @@
 					this.goto(url,cost,costExp);
 				}
 			},
+			// #endif
 			goto(url,cost,costExp){
 				console.log('cost='+cost+',costExp='+costExp);
 				if(cost==0&&costExp==0){

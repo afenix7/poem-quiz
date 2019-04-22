@@ -4,7 +4,7 @@
 		<text v-if="!storyMode&&!loading&&!showSuccess&&!showFailure&&!dead" class="middle-absolute2 info2" :style="{marginTop:titleTop}">还剩{{counter}}秒</text>
 		<text v-if="!storyMode&&!loading" :style="{marginTop:titleTop2}" class="middle-absolute2 info">{{currNo+1}}/{{questions.length}}</text>
 		<view v-show="!loading&&!showSuccess&&!showFailure&&!dead" class="middle-absolute2 qa" :style="{'top':buttonTop,'width':'600upx'}">
-			<text v-show="!loading&&!storyMode" class="title" style="max-width: 600upx;">
+			<text decode v-show="!loading&&!storyMode" class="title" style="max-width: 600upx;">
 				{{questions[currNo].title}}
 			</text>
 			<view v-show="!loading&&!storyMode" class="layout-column" style="margin-top:35upx;">
@@ -22,7 +22,7 @@
 				</button>
 				<text v-if="!storyMode&&!loading" style="margin-top:40upx;" class="info middle">{{statusText}}</text>
 			</view>
-			<text v-show="!loading&&storyMode&&questions[0]" class="title" style="max-width: 600upx;">
+			<text decode v-show="!loading&&storyMode&&questions[0]" class="title" style="max-width: 600upx;">
 				{{questions[0].title}}
 			</text>
 			<view v-if="!loading&&storyMode&&questions[0]" class="layout-column" style="margin-top:50upx;">
@@ -241,7 +241,6 @@
 				query.equalTo('category',"==",this.category);
 				const count = await query.count();
 				this.count = count;
-				console.log(`共有${count}条题目`);
 				if(count==0){
 					return;
 				}
@@ -266,7 +265,10 @@
 					this.canShare = true;
 					let usedSkips = [];
 					//const skip = count<=10?0:Math.round(Math.random()*Math.round(count/10));
-					const num = this.rule.maxNum<=count?this.rule.maxNum:count;
+					const num = this.rule.max_num<=count?this.rule.max_num:count;
+					console.log(this.rule.max_num);
+					console.log(count);
+					console.log("num="+num);
 					promises = [];
 					for(let i=0;i<num;i++){
 						let skip = Math.round(Math.random()*(count-1));
@@ -279,7 +281,6 @@
 						promises.push(query.find());
 					}
 					resArr = await Promise.all(promises);
-					console.log(resArr);
 					resArr.forEach(it=>{
 						this.questions = this.questions.concat(it);
 					});
@@ -310,7 +311,6 @@
 					return;
 				}
 				if(this.judgeMode){
-					console.log('当前正在判断对错，无法点击');
 					return;
 				}
 				if(this.showSuccess&&this.showFailure){
@@ -318,6 +318,7 @@
 				}
 				if(idx==this.questions[this.currNo].correct_no){
 					this.btnClasses[idx-1] = 'btn-correct';
+					//let correctChar = this.questions[this.currNo].correct_no == 1?'A':(this.questions[this.currNo].correct_no == 2?'B':(this.questions[this.currNo].correct_no == 3?'C':'D'));
 					this.statusText = '你答对了';
 					this.correctNum++;
 					this.judgeMode = true;
@@ -353,7 +354,6 @@
 					this.showAnswer4 = false;
 					let res;
 					if(this.firstId&&this.firstId!=null){
-						console.log('第一个剧情');
 						res = await query.get(this.firstId);
 						console.log(res);
 						this.questions = [res];
@@ -361,14 +361,12 @@
 					}
 					else if(this.questions.length>0&&this.questions[0].nextIdList[this.currSelIdx-1]&&this.questions[0].nextIdList[this.currSelIdx-1]!=null&&this.questions[0].nextIdList[this.currSelIdx-1]!=''){
 						if(this.questions[0].nextIdList[0]==1){
-							console.log('剧情胜利');
 							this.canShare = true;
 							this.shareText = this.questions[0].title;
 							this.questions = [];
 							this.stageClear();
 						}
 						else if(this.questions[0].nextIdList[0]==2){
-							console.log('剧情失败');
 							this.canShare = true;
 							this.shareText = this.questions[0].title;
 							this.questions = [];
@@ -384,19 +382,13 @@
 						}
 						else{
 							//有bug，点0后还是undefined,解决:数据表内数组不可设[0],故设为[2]
-							console.log('取下一个');
-							console.log(this.currSelIdx);
-							//res = await query.get('UIhL111H');
-							//console.log(res);
 							let objId = this.questions[0].nextIdList[this.currSelIdx-1];
-							console.log('query objId:'+objId);
 							res = await query.get(objId);
 							this.questions = [res];
 						}
 					}
 					else{
 						//第一题，以及当前题没有后续题就随机取
-						console.log('随机取剧情');
 						let usedSkips = [];
 						query.equalTo('category',"==",this.category);
 						this.count = query.count();
@@ -409,9 +401,7 @@
 						query.limit(1);
 						query.skip(skip);
 						let res2 = await query.find();
-						console.log(res2);
 						this.questions=[res2];
-						console.log(this.questions);
 					}
 					if(this.questions[0].answer1){
 						this.showAnswer1 = true;
@@ -571,9 +561,20 @@
 				this.dead = false;
 				uni.showToast({
 					title:'成功复活',
-					icon:'none'
+					icon:'none',
+					duration:500
 				});
-				this.next();
+				//this.next();
+				this.initOnlyStates();
+				this.resetTimer();
+				this.btnClasses[this.questions[this.currNo].correct_no-1]='btn-correct';
+				let correctChar = this.questions[this.currNo].correct_no == 1?'A':(this.questions[this.currNo].correct_no == 2?'B':(this.questions[this.currNo].correct_no == 3?'C':'D'));
+				this.statusText = '正确答案是'+correctChar;
+				this.correctNum++;
+				this.judgeMode = true;
+				setTimeout(()=>{
+					this.next();
+				},1500);
 			}
 		}
 	}
